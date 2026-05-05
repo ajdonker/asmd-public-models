@@ -10,3 +10,7 @@ S = ? [ p6 > 0]
 
 S = ? [ p7 > 0 ]
 
+R{"numReaders"}=? [ S ]
+
+R{"numWriters"}=? [ S ]
+
