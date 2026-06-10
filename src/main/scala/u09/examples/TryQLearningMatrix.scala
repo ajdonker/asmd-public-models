@@ -14,6 +14,7 @@ object TryQMatrix extends App :
     terminal = {case _=>false},
     reward = { case ((1,0),_) => 10; case ((3,0),_) => 5; case _ => 0},
     jumps = { case ((1,0),_) => (1,4); case ((3,0),_) => (3,2) },
+    obstacles = Set((2,2),(4,4)),
     gamma = 0.9,
     alpha = 0.5,
     epsilon = 0.3,

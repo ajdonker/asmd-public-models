@@ -17,6 +17,7 @@ object QMatrix:
                      terminal: PartialFunction[Node, Boolean],
                      reward: PartialFunction[(Node, Move), Double],
                      jumps: PartialFunction[(Node, Move), Node],
+                     obstacles: Set[Node],
                      gamma: Double,
                      alpha: Double,
                      epsilon: Double = 0.0,
@@ -32,7 +33,10 @@ object QMatrix:
           case ((n1, n2), LEFT) => ((n1 - 1) max 0, n2)
           case ((n1, n2), RIGHT) => ((n1 + 1) min (width - 1), n2)
           case _ => ???
+
+        if obstacles.contains(n2) then (-10000.0, s)
         // computes rewards, and possibly a jump
+        else
         (reward.apply((s, a)), jumps.orElse[(Node, Move), Node](_ => n2)(s, a))
 
     def qFunction = QFunction(Move.values.toSet, v0, terminal)
@@ -43,5 +47,10 @@ object QMatrix:
       (for
         row <- 0 until width
         col <- 0 until height
-      yield formatString.format(v((col, row))) + (if (col == height - 1) "\n" else "\t"))
+      yield
+        val node = (col,row)
+        val cell =
+            formatString.format(v(node))
+        cell + (if (col == height - 1) "\n" else "\t")
+      )
         .mkString("")
