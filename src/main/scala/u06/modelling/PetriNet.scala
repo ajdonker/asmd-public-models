@@ -25,3 +25,5 @@ object PetriNet:
     def ~~> (y: Marking[P]) = Trn(self, y, MSet())
   extension [P](self: Trn[P])
     def ^^^ (z: Marking[P]) = self.copy(inh = z)
+
+

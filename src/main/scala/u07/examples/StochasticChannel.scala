@@ -21,3 +21,4 @@ object StochasticChannel:
 @main def mainStochasticChannel() =  // example run
   import StochasticChannel.*
   State.values.foreach(s => println(s"$s,${stocChannel.transitions(s)}"))
+    
