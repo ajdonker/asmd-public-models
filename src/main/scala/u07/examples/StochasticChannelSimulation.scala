@@ -20,5 +20,5 @@ import u07.examples.StochasticChannel.*
   val avgTimeUntilDone = stocChannel.averageCompletionTime(10, IDLE, DONE, rnd)
   val avgTimeInFailState = stocChannel.averageFractionInState(10, IDLE, DONE, FAIL, rnd);
   println("average time until done: " + avgTimeUntilDone)
-  println("avg time in each state: " + avgTimeInFailState)
+  println("avg time in fail state: " + avgTimeInFailState)
 }

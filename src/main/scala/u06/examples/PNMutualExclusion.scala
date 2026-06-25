@@ -1,7 +1,11 @@
 package u06.examples
 
-export u06.modelling.PetriNet
+//export u06.modelling.PetriNet
+import u06.examples.ReadersWritersNet.paths
+import u06.modelling.PetriNet
+import u06.modelling.PetriNet.*
 import u06.utils.MSet
+import u06.utils.MSet.*
 
 object PNMutualExclusion:
 
@@ -9,9 +13,9 @@ object PNMutualExclusion:
     case N, T, C
     
   export Place.*
-  export u06.modelling.PetriNet.*
-  export u06.modelling.SystemAnalysis.*
-  export u06.utils.MSet
+//  export u06.modelling.PetriNet.*
+//  export u06.modelling.SystemAnalysis.*
+//  export u06.utils.MSet
 
   // DSL-like specification of a Petri Net
   def pnME = PetriNet[Place](

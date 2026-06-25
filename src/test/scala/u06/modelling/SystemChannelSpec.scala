@@ -1,4 +1,4 @@
-package u06.modelling
+package scala.u06.modelling
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
