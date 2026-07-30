@@ -1,8 +1,11 @@
 package u07.examples
 
-import u07.utils.Time
+import u07.utils.*
 import java.util.Random
+import u07.modelling.{CTMC, CTMCSimulation, SPN}
+import u07.modelling.SPN.Trn
 import u07.examples.StochasticChannel.*
+import u07.modelling.CTMCSimulation.*
 
 @main def mainStochasticChannelSimulation = {
   Time.timed:
@@ -13,12 +16,10 @@ import u07.examples.StochasticChannel.*
         .mkString("\n")
 
   val rnd = new Random
-  val timeUntilDone = stocChannel.statisticsUntil(IDLE,DONE, rnd)
+  val timeUntilDone = stocChannel.statisticsUntilEvent(IDLE,state => state == DONE, rnd)
   println("Time until done state:" + timeUntilDone.totalTime)
   println("Times in each state:" + timeUntilDone.stateTimes)
 
-  val avgTimeUntilDone = stocChannel.averageCompletionTime(10, IDLE, DONE, rnd)
-  val avgTimeInFailState = stocChannel.averageFractionInState(10, IDLE, DONE, FAIL, rnd);
-  println("average time until done: " + avgTimeUntilDone)
-  println("avg time in fail state: " + avgTimeInFailState)
+  val avgTimeUntilDone = stocChannel.averageCompletionTime(10, IDLE, state => state == DONE, rnd)
+  println("Average time until done" + avgTimeUntilDone)
 }
