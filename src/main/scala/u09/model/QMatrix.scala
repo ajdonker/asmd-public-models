@@ -17,7 +17,8 @@ object QMatrix:
                      terminal: PartialFunction[Node, Boolean],
                      reward: PartialFunction[(Node, Move), Double],
                      jumps: PartialFunction[(Node, Move), Node],
-                     obstacles: Set[Node],
+                     obstacles: Set[Node] = Set.empty,
+                     obstaclePenalty: Double = -10.0,
                      gamma: Double,
                      alpha: Double,
                      epsilon: Double = 0.0,
@@ -25,32 +26,46 @@ object QMatrix:
     type State = Node
     type Action = Move
 
-    def qEnvironment(): Environment = (s: Node, a: Move) =>
-        // applies direction, without escaping borders
-        val n2: Node = (s, a) match
-          case ((n1, n2), UP) => (n1, (n2 - 1) max 0)
-          case ((n1, n2), DOWN) => (n1, (n2 + 1) min (height - 1))
-          case ((n1, n2), LEFT) => ((n1 - 1) max 0, n2)
-          case ((n1, n2), RIGHT) => ((n1 + 1) min (width - 1), n2)
-          case _ => ???
+    private def normalDestination(state: Node, action: Move): Node =
+      (state, action) match
+        case ((x, y), UP) =>
+          (x, (y - 1).max(0))
 
-        if obstacles.contains(n2) then (-10000.0, s)
-        // computes rewards, and possibly a jump
+        case ((x, y), DOWN) =>
+          (x, (y + 1).min(height - 1))
+
+        case ((x, y), LEFT) =>
+          ((x - 1).max(0), y)
+
+        case ((x, y), RIGHT) =>
+          ((x + 1).min(width - 1), y)
+
+    def qEnvironment  (): Environment = (s: Node, a: Move) =>
+        val ordinaryDestination = normalDestination(s,a)
+        val destination = jumps.applyOrElse((s,a),(_: (Node, Move)) => ordinaryDestination)
+        if obstacles.contains(destination) then
+          (obstaclePenalty, s)
         else
-        (reward.apply((s, a)), jumps.orElse[(Node, Move), Node](_ => n2)(s, a))
+          val transitionReward = reward.applyOrElse((s,a), (_: (Node, Move)) => 0.0)
+          (transitionReward, destination)
 
     def qFunction = QFunction(Move.values.toSet, v0, terminal)
     def qSystem = QSystem(environment = qEnvironment(), initial, terminal)
     def makeLearningInstance() = QLearning(qSystem, gamma, alpha, epsilon, qFunction)
 
-    def show[E](v: Node => E, formatString: String): String =
+    def show[E](v: Node => E, formatString: String,
+                obstacleString: String = "X"): String =
       (for
-        row <- 0 until width
-        col <- 0 until height
+        row <- 0 until height
+        col <- 0 until width
       yield
         val node = (col,row)
-        val cell =
-            formatString.format(v(node))
-        cell + (if (col == height - 1) "\n" else "\t")
+        val cell = {
+            if obstacles.contains(node) then
+              obstacleString
+            else
+              formatString.format(v(node))
+        }
+        cell + (if (col == width - 1) "\n" else "\t")
       )
         .mkString("")
