@@ -40,7 +40,7 @@ object QMatrix:
         case ((x, y), RIGHT) =>
           ((x + 1).min(width - 1), y)
 
-    def qEnvironment  (): Environment = (s: Node, a: Move) =>
+    private def qEnvironment(): Environment = (s: Node, a: Move) =>
         val ordinaryDestination = normalDestination(s,a)
         val destination = jumps.applyOrElse((s,a),(_: (Node, Move)) => ordinaryDestination)
         if obstacles.contains(destination) then

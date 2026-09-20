@@ -1,5 +1,7 @@
 package u06.modelling
 
+import scala.annotation.tailrec
+
 // Basical analysis helpers
 object SystemAnalysis:
 
@@ -23,4 +25,16 @@ object SystemAnalysis:
 
     // complete paths with length '<= depth' (could be optimised)
     def completePathsUpToDepth(s: S, depth:Int): Seq[Path[S]] =
-      (1 to depth).to(LazyList) flatMap (paths(s, _)) filter (complete(_))
+      (1 to depth).to(LazyList) flatMap (paths(s, _)) filter complete
+
+    // compute reachable markings up to depth (bounded reachability)
+    def reachableMarkings(s: S, maxDepth: Int): Set[S] =
+      @tailrec
+      def iter(current: Set[S], explored: Set[S], depth: Int): Set[S] =
+        if depth == 0 || current.isEmpty then explored
+        else
+          val next = current.flatMap(system.next)
+          val newMarkings = next -- explored
+          iter(newMarkings, explored ++ newMarkings, depth - 1)
+      
+      iter(Set(s), Set(s), maxDepth)

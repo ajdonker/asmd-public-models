@@ -26,7 +26,7 @@ trait QRLImpl extends QRL:
                         terminalValue: Double = 0.0) extends Q:
 
     val map: collection.mutable.Map[(State, Action), Reward] = collection.mutable.Map()
-    override def apply(s: State, a: Action) = if (terminal(s)) terminalValue else map.getOrElse(s -> a, v0)
+    override def apply(s: State, a: Action): Reward = if (terminal(s)) terminalValue else map.getOrElse(s -> a, v0)
     override def update(s: State, a: Action, v: Double): Q = { map += ((s -> a) -> v); this }
     override def toString = map.toString
 

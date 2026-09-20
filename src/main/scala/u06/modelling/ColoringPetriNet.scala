@@ -18,6 +18,7 @@ object ColoringPetriNet {
         t <- cpn
         if m.disjoined(t.inh) && m.matches(t.cond)
         out <- m.extract(t.cond)
-      yield out.union(t.eff(t.cond))
+        consumed = m.diff(out)
+      yield out.union(t.eff(consumed))
 
 }

@@ -44,13 +44,11 @@ object StochasticReadersWriters:
     )
     println("Time until write: " + timeUntilWrite.totalTime)
 
-    val avgTimeReadingBeforeWrite = readersWritersCTMC.averageFractionInState(
-      10,
-      initMarking,
-      10,
-      marking => marking(READ) > 0,
+    val avgTimeReadingUntilWrite = readersWritersCTMC.statisticsUntilEvent(
+      initMarking, marking => marking(WRITE) > 0,
       rnd
     )
-    println("Average time in read before a write" + avgTimeReadingBeforeWrite)
+    val timeReading = avgTimeReadingUntilWrite.stateTimes.collect {   case (marking, time) if marking(READ) > 0 => time }.sum 
+    println("Time spent reading until a write: " + timeReading)
   }
 

@@ -34,9 +34,10 @@ trait QRL:
     def actions: Set[Action]
     def update(s: State, a: Action, v: Reward): Q
     def bestPolicy: Policy = s => actions.maxBy(this(s, _))
-    def epsPolicy(f: Probability): Policy = _ match
+    def epsPolicy(f: Probability): Policy = {
       case _ if Stochastics.drawFiltered(_ < f) => Stochastics.uniformDraw(actions)
       case s => bestPolicy(s)
+    }
     def vFunction: State => Reward = s => actions.map(this(s, _)).max
 
   // The learning system, with parameters

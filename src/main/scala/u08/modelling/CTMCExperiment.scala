@@ -8,10 +8,13 @@ object CTMCExperiment:
 
   opaque type Property[A] = Trace[A] => Boolean
 
+  extension [A](prop: Property[A])
+    def apply(trace: Trace[A]): Boolean = prop(trace)
+
   given rnd: Random = new Random
 
   extension [S](self: CTMC[S])
-    // globally is simply achieved by equivalence not G x= F not x
+    
     def eventually[A](filt: A => Boolean): Property[A] =
       trace => trace exists (e => filt(e.state))
 
@@ -19,8 +22,10 @@ object CTMCExperiment:
     def bounded[A](timeBound: Double)(prop: Property[A]): Property[A] =
       trace => prop(trace takeWhile (_.time <= timeBound))
 
+    // globally is simply achieved by equivalence not G x= F not x
     def globally[A](filt: A => Boolean): Property[A] =
-      trace => trace.forall(e => filt(e.state))
+      //trace => trace.forall(e => filt(e.state))
+      trace => !eventually(filt.andThen(!_))(trace)
 
     def until[A](pred: A => Boolean, q: A => Boolean): Property[A] =
       trace =>
@@ -43,21 +48,20 @@ object CTMCExperiment:
 
       // Long-run fraction of time spent in states satisfying filt in one run
     def steadyStateEstimateSingle(horizon: Double, filt: S => Boolean, s0: S): Double =
-      val trace = self.newSimulationTrace(s0, rnd).takeWhile(_.time <= horizon).toList
-      trace match
-        case Nil => 0.0
-        case _ =>
-          val intervals =
-            trace.zip(trace.drop(1)).map { case (curr, next) =>
-              val dt = next.time - curr.time
-              if filt(curr.state) then dt else 0.0
-            }
+      val events = self.newSimulationTrace(s0, rnd).takeWhile(_.time <= horizon).toList
+      val evs =
+        if events.isEmpty then List(Event(0.0, s0)) else events
 
-          val lastTime = trace.last.time
-          val totalTime = math.max(lastTime, 1e-9)
-          intervals.sum / totalTime
+      val intervals = evs.zip(evs.drop(1)).map { case (curr, next) =>
+        val dt = next.time - curr.time
+        if filt(curr.state) then dt else 0.0
+      }
 
-      // Average long-run fraction over many runs
+      val tail = if filt(evs.last.state) then math.max(0.0, horizon - evs.last.time) else 0.0 // time after system "settled" in the last state, before horizon time
+      val total = horizon max 1e-9
+      (intervals.sum + tail) / total
+
+// Average long-run fraction over many runs
     def steadyStateEstimate(runs: Int, horizon: Double, filt: S => Boolean, s0: S): Double =
       (0 until runs).map { _ =>
         steadyStateEstimateSingle(horizon, filt, s0)
@@ -75,5 +79,4 @@ object CTMCExperiment:
         steadyStateEstimate(runs, horizon, f1, s0),
         steadyStateEstimate(runs, horizon, f2, s0)
       )
-
 
